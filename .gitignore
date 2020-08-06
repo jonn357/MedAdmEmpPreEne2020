@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+# Archivos planos de texto
+*.cvs
