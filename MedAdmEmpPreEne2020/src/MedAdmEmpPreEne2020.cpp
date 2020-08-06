@@ -34,11 +34,11 @@ void contarNivelCompetencia();
 void extraerVariables();
 void split();
 int main() {
-	//leer();
+	leer();
 
-	//escribirCSV();
-	//extraerVariables();
-	//contarNivelCompetencia();
+	escribirCSV();
+	extraerVariables();
+	contarNivelCompetencia();
 	//imprimir(personas);
 	split();
 	return 0;
@@ -49,7 +49,7 @@ void leer(){
 	//string matriz[630][8];
 	string valor="";
 	int i=0,j=0;
-   ifstream infile("C:\\Desarrollo\\MedAdmEmpPreEne2020\\src\\MedAdmEmpPreEne2020.csv");
+   ifstream infile("C://Desarrollo//AcrhivosPlanos//MedAdmEmpPreEne2020.csv");
    if (infile.good()) {
            cout << "el fichero input se ha abierto correctamente" << endl;
        }
@@ -111,7 +111,7 @@ void cargarPersonas( Persona persona){
 }
 void escribirCSV(){
 		//int i=0,j=0;
-	   ofstream outfile("C:\\Desarrollo\\MedAdmEmpPreEne2020\\src\\tablas.csv");
+	   ofstream outfile("C://Desarrollo//AcrhivosPlanos//tablas.csv");
 	   if (outfile.good()) {
 	           cout << "el fichero out se ha abierto correctamente" << endl;
 	       }
