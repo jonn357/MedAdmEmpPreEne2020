@@ -151,9 +151,9 @@ void extraerVariables(){
 	bool esIgualCompetencia=false;
 	bool esIgualNivelCompetenciaAlcanzado=false;
 	int contarEvaluacion=0,contarCompetencia=0,contarNivelCompetenciaAlcanzado=0;
-	for(auto n = begin(personas); n != end(personas); n++){
+	for(auto n = begin(personas); n != end(personas); n++){                              //iterar por periodos (clave del mapa)
 	    	//cout << endl << "periodo: " << n->first << endl;
-	    	for(auto per = begin(n->second); per != end(n->second); per++){
+	    	for(auto per = begin(n->second); per != end(n->second); per++){             //iterar por persona en el vector(valor mapa) segun el periodo
 	    		if(evaluacion.empty()){
 	    		    evaluacion.push_back(per->evaluacion);
 	    		    esIgualEvaluacion=false;
@@ -208,9 +208,6 @@ void extraerVariables(){
 	    			    				//esIgualValor=true;
 	    			    			}
 	    			    		}
-
-
-
 	    		/*if(n->first=="201810" and per->evaluacion=="Formativa" and per->competencia=="Gestión de Personas" and per->nivelCompetenciaAlcanzado=="Intermedio"){
 	    			contador++;
 	    		}*/
@@ -235,12 +232,18 @@ void extraerVariables(){
 	cout << "Total NivelCompetenciaAlcanzado: " << contarNivelCompetenciaAlcanzado << "total: "<< nivelCompetenciaAlcanzado.size() << endl;
 }
 void split(){
-	char str[]="hola,ho";
+	char str[]="hola, mundo";
 	char *pch;
+
 	pch = strtok(str, ",");
 	cout << pch << endl;
 	while(pch != NULL){
         pch = strtok(NULL, ",");
+        if(pch[0]==32){
+        	for(int i=0; i < strlen(pch); i++){
+        		pch[i]=pch[i+1];
+        	}
+        }
         cout << pch << endl;
 	}
 }
