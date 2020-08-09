@@ -13,7 +13,6 @@
 #include <windows.h>
 #include <map>
 using namespace std;
- //  string matriz[630][8];
 struct Persona{
 	 string orden;
 	 string periodo;
@@ -32,15 +31,14 @@ void cargarDatos(vector<string>);
 void cargarPersonas(Persona);
 void contarNivelCompetencia();
 void extraerVariables();
-void split();
+void split(string);
+string arrayAstring(char* , int);
 int main() {
 	leer();
 
 	escribirCSV();
 	extraerVariables();
 	contarNivelCompetencia();
-	//imprimir(personas);
-	split();
 	return 0;
 }
 //lee el archivo csv, los datos los almacena en una matriz.
@@ -146,66 +144,56 @@ void contarNivelCompetencia(){
 }
 void extraerVariables(){
 	/*con vectores*/
-	vector<string> evaluacion,competencia,nivelCompetenciaAlcanzado;
+	vector<string> evaluacion,competencia,nivelCompetenciaAlcanzado,competenciaPrueba;
 	bool esIgualEvaluacion=false;
 	bool esIgualCompetencia=false;
 	bool esIgualNivelCompetenciaAlcanzado=false;
 	int contarEvaluacion=0,contarCompetencia=0,contarNivelCompetenciaAlcanzado=0;
 	for(auto n = begin(personas); n != end(personas); n++){                              //iterar por periodos (clave del mapa)
-	    	//cout << endl << "periodo: " << n->first << endl;
 	    	for(auto per = begin(n->second); per != end(n->second); per++){             //iterar por persona en el vector(valor mapa) segun el periodo
-	    		if(evaluacion.empty()){
-	    		    evaluacion.push_back(per->evaluacion);
+	    		if(evaluacion.empty()){                                                 //(primera iteracion)el vector 'evaluacion' esta vacio?
+	    		    evaluacion.push_back(per->evaluacion);                              //agregar el primer valor, se debe usar split()
 	    		    esIgualEvaluacion=false;
-	    		    //cout << per->orden << "vacio, per->evaluacio: " << per->evaluacion << endl;
-	    		}else if(!evaluacion.empty()){
+	    		}else if(!evaluacion.empty()){                                          //(segunda iteracion o mas)el vector 'evaluacion' ya tiene almenos un valor?
 	    			esIgualEvaluacion=false;
-	    			for(auto r = begin(evaluacion); r != end(evaluacion); r++){
-	    				if(*r == per->evaluacion){
-	    					 esIgualEvaluacion=true;
-	    					 //cout << "*r" << *r << endl;
+	    			for(auto r = begin(evaluacion); r != end(evaluacion); r++){         //verifica que el nuevo valor a ingresar no exista en el vector.
+	    				if(*r == per->evaluacion){                                     //los dos string son diferentes?
+	    					 esIgualEvaluacion=true;                                   //nuevo valor no existe
 	    				}
 	    			 }
-	    			if(esIgualEvaluacion!=true){
+	    			if(esIgualEvaluacion!=true){                                      //si el valor no existe lo ingresa en el vector!
 	    				evaluacion.push_back(per->evaluacion);
-	    				//cout << "entro1" << endl;
-	    				//esIgualValor=true;
 	    			}
 	    		}
 	    		if(competencia.empty()){
 	    			    		    competencia.push_back(per->competencia);
+	    			    		    //competenciaPrueba=split(per->competencia);//
+	    			    		    split(per->competencia);
 	    			    		    esIgualCompetencia=false;
-	    			    		    //cout << per->orden << "vacio, per->evaluacio: " << per->evaluacion << endl;
 	    			    		}else if(!competencia.empty()){
 	    			    			esIgualCompetencia=false;
 	    			    			for(auto r = begin(competencia); r != end(competencia); r++){
 	    			    				if(*r == per->competencia){
 	    			    					esIgualCompetencia=true;
-	    			    					 //cout << "*r" << *r << endl;
 	    			    				}
 	    			    			 }
 	    			    			if(esIgualCompetencia!=true){
-	    			    				competencia.push_back(per->competencia);
-	    			    				//cout << "entro1" << endl;
-	    			    				//esIgualValor=true;
+	    			    				//competencia.push_back(per->competencia);
+	    			    				//competenciaPrueba=split(per->competencia);
 	    			    			}
 	    			    		}
 	    		if(nivelCompetenciaAlcanzado.empty()){
 	    			    		    nivelCompetenciaAlcanzado.push_back(per->nivelCompetenciaAlcanzado);
 	    			    		    esIgualNivelCompetenciaAlcanzado=false;
-	    			    		    //cout << per->orden << "vacio, per->evaluacio: " << per->evaluacion << endl;
 	    			    		}else if(!nivelCompetenciaAlcanzado.empty()){
 	    			    			esIgualNivelCompetenciaAlcanzado=false;
 	    			    			for(auto r = begin(nivelCompetenciaAlcanzado); r != end(nivelCompetenciaAlcanzado); r++){
 	    			    				if(*r == per->nivelCompetenciaAlcanzado){
 	    			    					esIgualNivelCompetenciaAlcanzado=true;
-	    			    					 //cout << "*r" << *r << endl;
 	    			    				}
 	    			    			 }
 	    			    			if(esIgualNivelCompetenciaAlcanzado!=true){
 	    			    				nivelCompetenciaAlcanzado.push_back(per->nivelCompetenciaAlcanzado);
-	    			    				//cout << "entro1" << endl;
-	    			    				//esIgualValor=true;
 	    			    			}
 	    			    		}
 	    		/*if(n->first=="201810" and per->evaluacion=="Formativa" and per->competencia=="Gestión de Personas" and per->nivelCompetenciaAlcanzado=="Intermedio"){
@@ -231,19 +219,63 @@ void extraerVariables(){
 	}
 	cout << "Total NivelCompetenciaAlcanzado: " << contarNivelCompetenciaAlcanzado << "total: "<< nivelCompetenciaAlcanzado.size() << endl;
 }
-void split(){
-	char str[]="hola, mundo";
-	char *pch;
+string arrayAstring(char* arregloChar, int sizeChar){     //convierte array en string
+	int i;
+	string s = "";
+	for(i=0; i<sizeChar; i++){
+		s = s + arregloChar[i];
+	}
+	return s;
+}
+void split(string competencia){
+	int contarWhile=0;
+	competencia="Gestión de Organizaciones, Gestión de Personas, Gestión de Mercadeo, Gestión Financiera";
+	int pch_size=0;
+    //vector<string> competenciaTemp;
+	string pchStr;
+	              // string; per->competencia=Gestión de Organizaciones, Gestión de Personas, Gestión de Mercadeo, Gestión Financiera
+    //int n=competencia.length();
+	char * str=new char[competencia.length()+1];
+	//cout << "competencia.length(): " << competencia.length() << " competencia.c_str(): " << competencia.c_str() << endl;
+	//str=competencia;
+	strcpy(str, competencia.c_str());
+	//char* pch=new char(competencia.length()+1);
+                                               //competencia.push_back(per->competencia);
+	char * pch = strtok(str, ",");
 
-	pch = strtok(str, ",");
-	cout << pch << endl;
+	//int pch_size = sizeof(*pch) / sizeof(char);
+	//string pchStr = arrayAstring(pch, pch_size);
+	//competencia.push_back(pchStr);
+	cout << "competencia--:" << pch << endl;//**********************************************************
 	while(pch != NULL){
+		contarWhile = ++contarWhile;
+		//cout << contarWhile << " :while" << endl;//**************************************************************
         pch = strtok(NULL, ",");
+        if(pch != NULL){
         if(pch[0]==32){
+        	//cout << "if" << endl;
         	for(int i=0; i < strlen(pch); i++){
+        		//cout << "i:" << i << endl;
+        		pch_size=i;
         		pch[i]=pch[i+1];
         	}
         }
-        cout << pch << endl;
+        pch_size=pch_size+1;
+
+        //cout << "end if" << endl;//**************************************************************
+        //cout << "strtok pch:"<< pch << endl;//*******************************************************
+        //pch_size = sizeof(pch) / sizeof(char);
+        //pch_size = strlen(pch)
+        //cout <<"pch_size: " << pch_size << endl;//**************************************************************
+
+        pchStr = arrayAstring(pch, pch_size);
+
+        competencia=pchStr;
+        cout <<"competencia-: " << competencia << endl;
+        }
+        //
+
 	}
+	delete[] str;
+	//return competenciaTemp;
 }
