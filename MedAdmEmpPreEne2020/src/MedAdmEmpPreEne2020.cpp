@@ -24,27 +24,27 @@ struct Persona{
 	 string resultadoCalificacion;
  };
 map<string, vector<Persona>> personas;
+vector<string> evaluacion,competencia,nivelCompetenciaAlcanzado,competenciaPrueba;
 void leer();
 void escribirCSV();
 void imprimir(map<string, vector<Persona>>);
 void cargarDatos(vector<string>);
 void cargarPersonas(Persona);
 void contarNivelCompetencia();
-void extraerVariables();
-void split(string);
+void extraerVariables(vector<string>& evaluacion, vector<string>& competencia, vector<string>&   nivelCompetenciaAlcanzado);
+void split(vector<string>& competencia, string competenciaStr);
 string arrayAstring(char* , int);
+void esIgual(vector<string>& competencia, string competenciaStr);
 int main() {
 	leer();
 
 	escribirCSV();
-	extraerVariables();
+	extraerVariables(evaluacion, competencia, nivelCompetenciaAlcanzado);
 	contarNivelCompetencia();
 	return 0;
 }
-//lee el archivo csv, los datos los almacena en una matriz.
-void leer(){
+void leer(){                              //lee el archivo csv, los datos los almacena en una matriz.
 	vector<string> entradaRegistro;
-	//string matriz[630][8];
 	string valor="";
 	int i=0,j=0;
    ifstream infile("C://Desarrollo//AcrhivosPlanos//MedAdmEmpPreEne2020.csv");
@@ -60,7 +60,6 @@ void leer(){
 	   string texto= "";
 	   while(getline(strstr, texto, ';')){
 		  if (i<630 && j<8) {
-			  //cout << "i; "<< i << " j: "<<j << endl;
 		  entradaRegistro.push_back(texto);
 		   j++;
 		  }else{
@@ -68,11 +67,7 @@ void leer(){
 		  }
 	   }
 	   cargarDatos(entradaRegistro);
-	   /*for (auto n=begin(entradaRegistro); n != end(entradaRegistro); n++){
-		   cout << *n << endl;
-	   }*/
 	   entradaRegistro.clear();
-	   //cout << "i:" << i << endl;
 	   i++;
 	   j=0;
    }
@@ -101,14 +96,11 @@ void cargarDatos( vector<string> entradaRegistro){
 	persona.nivelCompetenciaAlcanzado=entradaRegistro[6];
 	persona.resultadoCalificacion=entradaRegistro[7];
 	cargarPersonas(persona);
-	//cout << "prueba: " << personas.size()<< "-" << endl;
-	//cout << persona.orden << " " <<  persona.nombre << endl;
 }
 void cargarPersonas( Persona persona){
 	personas[persona.periodo].push_back(persona);
 }
 void escribirCSV(){
-		//int i=0,j=0;
 	   ofstream outfile("C://Desarrollo//AcrhivosPlanos//tablas.csv");
 	   if (outfile.good()) {
 	           cout << "el fichero out se ha abierto correctamente" << endl;
@@ -118,21 +110,15 @@ void escribirCSV(){
 	       }
 	   string line = "";
 	   for(auto n = begin(personas); n != end(personas); n++){
-	       	//cout << endl << "periodo: " << n->first << endl;
 	       	for(auto per = begin(n->second); per != end(n->second); per++){
 	       		outfile << n->first << "," << per->nombre<< endl;
-	       		//cout << "nombre: " << per->nombre << endl;
 	       	}
 	       }
 	   outfile.close();
-	   //cout << "correctamente" << endl;
-	   //cout << "i: " << i << "j: " << j <<endl;
 }
-void contarNivelCompetencia(){
-	/*por periodo,por evaluacion, por competencia*/
+void contarNivelCompetencia(){                  /*por periodo,por evaluacion, por competencia*/
 	int contador=0;
 	for(auto n = begin(personas); n != end(personas); n++){
-	    	//cout << endl << "periodo: " << n->first << endl;
 	    	for(auto per = begin(n->second); per != end(n->second); per++){
 
 	    		/*if(n->first=="201810" and per->evaluacion=="Formativa" and per->competencia=="Gestión de Personas" and per->nivelCompetenciaAlcanzado=="Intermedio"){
@@ -142,9 +128,7 @@ void contarNivelCompetencia(){
 	    }
 	cout << "CONTADOR: " << contador << endl;
 }
-void extraerVariables(){
-	/*con vectores*/
-	vector<string> evaluacion,competencia,nivelCompetenciaAlcanzado,competenciaPrueba;
+void extraerVariables(vector<string>& evaluacion, vector<string>& competencia, vector<string>&   nivelCompetenciaAlcanzado){
 	bool esIgualEvaluacion=false;
 	bool esIgualCompetencia=false;
 	bool esIgualNivelCompetenciaAlcanzado=false;
@@ -165,23 +149,7 @@ void extraerVariables(){
 	    				evaluacion.push_back(per->evaluacion);
 	    			}
 	    		}
-	    		if(competencia.empty()){
-	    			    		    competencia.push_back(per->competencia);
-	    			    		    //competenciaPrueba=split(per->competencia);//
-	    			    		    split(per->competencia);
-	    			    		    esIgualCompetencia=false;
-	    			    		}else if(!competencia.empty()){
-	    			    			esIgualCompetencia=false;
-	    			    			for(auto r = begin(competencia); r != end(competencia); r++){
-	    			    				if(*r == per->competencia){
-	    			    					esIgualCompetencia=true;
-	    			    				}
-	    			    			 }
-	    			    			if(esIgualCompetencia!=true){
-	    			    				//competencia.push_back(per->competencia);
-	    			    				//competenciaPrueba=split(per->competencia);
-	    			    			}
-	    			    		}
+	    		split(competencia, per->competencia);//
 	    		if(nivelCompetenciaAlcanzado.empty()){
 	    			    		    nivelCompetenciaAlcanzado.push_back(per->nivelCompetenciaAlcanzado);
 	    			    		    esIgualNivelCompetenciaAlcanzado=false;
@@ -196,12 +164,7 @@ void extraerVariables(){
 	    			    				nivelCompetenciaAlcanzado.push_back(per->nivelCompetenciaAlcanzado);
 	    			    			}
 	    			    		}
-	    		/*if(n->first=="201810" and per->evaluacion=="Formativa" and per->competencia=="Gestión de Personas" and per->nivelCompetenciaAlcanzado=="Intermedio"){
-	    			contador++;
-	    		}*/
-	    		//cout << "r: " << *r << ". per->evaluacion: " << per->evaluacion << endl;
 	    	}
-	    	//cout << "extraer evaluacion: " << evaluacion.size() << endl;
 	    }
 	for(auto n=begin(evaluacion); n!=end(evaluacion); n++){
 		contarEvaluacion++;
@@ -227,55 +190,40 @@ string arrayAstring(char* arregloChar, int sizeChar){     //convierte array en s
 	}
 	return s;
 }
-void split(string competencia){
-	int contarWhile=0;
-	competencia="Gestión de Organizaciones, Gestión de Personas, Gestión de Mercadeo, Gestión Financiera";
+void split(vector<string>& competencia, string competenciaStr){
 	int pch_size=0;
-    //vector<string> competenciaTemp;
 	string pchStr;
-	              // string; per->competencia=Gestión de Organizaciones, Gestión de Personas, Gestión de Mercadeo, Gestión Financiera
-    //int n=competencia.length();
-	char * str=new char[competencia.length()+1];
-	//cout << "competencia.length(): " << competencia.length() << " competencia.c_str(): " << competencia.c_str() << endl;
-	//str=competencia;
-	strcpy(str, competencia.c_str());
-	//char* pch=new char(competencia.length()+1);
-                                               //competencia.push_back(per->competencia);
+	char * str=new char[competenciaStr.length()+1];
+	strcpy(str, competenciaStr.c_str());
 	char * pch = strtok(str, ",");
-
-	//int pch_size = sizeof(*pch) / sizeof(char);
-	//string pchStr = arrayAstring(pch, pch_size);
-	//competencia.push_back(pchStr);
-	cout << "competencia--:" << pch << endl;//**********************************************************
+	if(competencia.empty()){
+		competencia.push_back(pch);
+	}else if(!competencia.empty()){
+	    esIgual(competencia, pch);//competencia.push_back(pch);
+	}
 	while(pch != NULL){
-		contarWhile = ++contarWhile;
-		//cout << contarWhile << " :while" << endl;//**************************************************************
         pch = strtok(NULL, ",");
         if(pch != NULL){
         if(pch[0]==32){
-        	//cout << "if" << endl;
-        	for(int i=0; i < strlen(pch); i++){
-        		//cout << "i:" << i << endl;
+        	for(int i=0; i < strlen(pch)-1; i++){
         		pch_size=i;
         		pch[i]=pch[i+1];
         	}
         }
         pch_size=pch_size+1;
-
-        //cout << "end if" << endl;//**************************************************************
-        //cout << "strtok pch:"<< pch << endl;//*******************************************************
-        //pch_size = sizeof(pch) / sizeof(char);
-        //pch_size = strlen(pch)
-        //cout <<"pch_size: " << pch_size << endl;//**************************************************************
-
         pchStr = arrayAstring(pch, pch_size);
-
-        competencia=pchStr;
-        cout <<"competencia-: " << competencia << endl;
+        competenciaStr=pchStr;
+        esIgual(competencia, competenciaStr);//competencia.push_back(competenciaStr);      //*****************************************
         }
-        //
-
 	}
 	delete[] str;
-	//return competenciaTemp;
+}
+void esIgual(vector<string>& competencia, string competenciaStr){
+	bool esIgual=false;
+	for(auto r = begin(competencia); r != end(competencia); r++){
+		if(*r == competenciaStr){
+			esIgual=true;
+		}
+	}
+	if(esIgual==false){competencia.push_back(competenciaStr);}
 }
