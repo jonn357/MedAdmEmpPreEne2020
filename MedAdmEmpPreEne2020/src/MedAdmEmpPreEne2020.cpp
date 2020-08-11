@@ -19,7 +19,7 @@ struct Persona{
 	 string nombre;
 	 string evaluacion;
 	 string curso;
-	 string competencia;
+	 vector<string> competencia;//string competencia; // vector<string> competencia;debe ser un vector de competencias.z
 	 string nivelCompetenciaAlcanzado;
 	 string resultadoCalificacion;
  };
@@ -30,17 +30,18 @@ void escribirCSV();
 void imprimir(map<string, vector<Persona>>);
 void cargarDatos(vector<string>);
 void cargarPersonas(Persona);
-void contarNivelCompetencia();
+void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<string>& evaluacion, vector<string>& competencia, vector<string>& nivelCompetenciaAlcanzado);
 void extraerVariables(vector<string>& evaluacion, vector<string>& competencia, vector<string>&   nivelCompetenciaAlcanzado);
 void split(vector<string>& competencia, string competenciaStr);
 string arrayAstring(char* , int);
 void esIgual(vector<string>& competencia, string competenciaStr);
+void generarTablas();
 int main() {
 	leer();
 
 	escribirCSV();
 	extraerVariables(evaluacion, competencia, nivelCompetenciaAlcanzado);
-	contarNivelCompetencia();
+	contarNivelCompetencia(personas, evaluacion, competencia, nivelCompetenciaAlcanzado);
 	return 0;
 }
 void leer(){                              //lee el archivo csv, los datos los almacena en una matriz.
@@ -92,7 +93,8 @@ void cargarDatos( vector<string> entradaRegistro){
 	persona.nombre=entradaRegistro[2];
 	persona.evaluacion=entradaRegistro[3];
 	persona.curso=entradaRegistro[4];
-	persona.competencia=entradaRegistro[5];
+	split(persona.competencia,entradaRegistro[5]);
+	//persona.competencia=entradaRegistro[5];    //VECTOR + split
 	persona.nivelCompetenciaAlcanzado=entradaRegistro[6];
 	persona.resultadoCalificacion=entradaRegistro[7];
 	cargarPersonas(persona);
@@ -116,17 +118,21 @@ void escribirCSV(){
 	       }
 	   outfile.close();
 }
-void contarNivelCompetencia(){                  /*por periodo,por evaluacion, por competencia*/
+void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<string>& evaluacion, vector<string>& competencia, vector<string>& nivelCompetenciaAlcanzado){                  /*por periodo,por evaluacion, por competencia*/
 	int contador=0;
-	for(auto n = begin(personas); n != end(personas); n++){
-	    	for(auto per = begin(n->second); per != end(n->second); per++){
-
-	    		/*if(n->first=="201810" and per->evaluacion=="Formativa" and per->competencia=="Gestión de Personas" and per->nivelCompetenciaAlcanzado=="Intermedio"){
-	    			contador++;
-	    		}*/
-	    	}
-	    }
-	cout << "CONTADOR: " << contador << endl;
+	for(auto e = begin(evaluacion); e != end(evaluacion); e++){
+        for(auto c = begin(competencia); c != end(competencia); c++){
+	        for(auto p = begin(personas); p != end(personas); p++){
+	    	    for(auto nCa = begin(nivelCompetenciaAlcanzado); nCa != end(nivelCompetenciaAlcanzado); nCa++){
+	    	    	cout << "e;"<< *e << ";c;"<< *c << ";p;"<< p->first << ";nCa;"<< *nCa;
+                    for(auto pers = begin(p->second); pers != end(p->second); pers++){
+                    	contador++;
+                    }
+                    cout << ";CONTADOR;" << contador << endl;
+	    	    }
+	        }
+        }
+    }
 }
 void extraerVariables(vector<string>& evaluacion, vector<string>& competencia, vector<string>&   nivelCompetenciaAlcanzado){
 	bool esIgualEvaluacion=false;
@@ -134,38 +140,58 @@ void extraerVariables(vector<string>& evaluacion, vector<string>& competencia, v
 	bool esIgualNivelCompetenciaAlcanzado=false;
 	int contarEvaluacion=0,contarCompetencia=0,contarNivelCompetenciaAlcanzado=0;
 	for(auto n = begin(personas); n != end(personas); n++){                              //iterar por periodos (clave del mapa)
-	    	for(auto per = begin(n->second); per != end(n->second); per++){             //iterar por persona en el vector(valor mapa) segun el periodo
-	    		if(evaluacion.empty()){                                                 //(primera iteracion)el vector 'evaluacion' esta vacio?
-	    		    evaluacion.push_back(per->evaluacion);                              //agregar el primer valor, se debe usar split()
-	    		    esIgualEvaluacion=false;
-	    		}else if(!evaluacion.empty()){                                          //(segunda iteracion o mas)el vector 'evaluacion' ya tiene almenos un valor?
-	    			esIgualEvaluacion=false;
-	    			for(auto r = begin(evaluacion); r != end(evaluacion); r++){         //verifica que el nuevo valor a ingresar no exista en el vector.
-	    				if(*r == per->evaluacion){                                     //los dos string son diferentes?
-	    					 esIgualEvaluacion=true;                                   //nuevo valor no existe
-	    				}
-	    			 }
-	    			if(esIgualEvaluacion!=true){                                      //si el valor no existe lo ingresa en el vector!
-	    				evaluacion.push_back(per->evaluacion);
+	    for(auto per = begin(n->second); per != end(n->second); per++){             //iterar por persona en el vector(valor mapa) segun el periodo
+	    	if(evaluacion.empty()){                                                 //(primera iteracion)el vector 'evaluacion' esta vacio?
+	    		evaluacion.push_back(per->evaluacion);                              //agregar el primer valor, se debe usar split()
+	    		esIgualEvaluacion=false;
+	    	}else if(!evaluacion.empty()){                                          //(segunda iteracion o mas)el vector 'evaluacion' ya tiene almenos un valor?
+	    	    esIgualEvaluacion=false;
+	    		for(auto r = begin(evaluacion); r != end(evaluacion); r++){         //verifica que el nuevo valor a ingresar no exista en el vector.
+	    			if(*r == per->evaluacion){                                     //los dos string son diferentes?
+	    				esIgualEvaluacion=true;                                   //nuevo valor no existe
 	    			}
 	    		}
-	    		split(competencia, per->competencia);//
-	    		if(nivelCompetenciaAlcanzado.empty()){
-	    			    		    nivelCompetenciaAlcanzado.push_back(per->nivelCompetenciaAlcanzado);
-	    			    		    esIgualNivelCompetenciaAlcanzado=false;
-	    			    		}else if(!nivelCompetenciaAlcanzado.empty()){
-	    			    			esIgualNivelCompetenciaAlcanzado=false;
-	    			    			for(auto r = begin(nivelCompetenciaAlcanzado); r != end(nivelCompetenciaAlcanzado); r++){
-	    			    				if(*r == per->nivelCompetenciaAlcanzado){
-	    			    					esIgualNivelCompetenciaAlcanzado=true;
-	    			    				}
-	    			    			 }
-	    			    			if(esIgualNivelCompetenciaAlcanzado!=true){
-	    			    				nivelCompetenciaAlcanzado.push_back(per->nivelCompetenciaAlcanzado);
-	    			    			}
-	    			    		}
+	    		if(esIgualEvaluacion!=true){                                      //si el valor no existe lo ingresa en el vector!
+	    			evaluacion.push_back(per->evaluacion);
+	    		}
+	    	}
+	    	//split(competencia, per->competencia);//
+	    	if(competencia.empty()){
+	    		for(auto c = begin(per->competencia); c != end(per->competencia); c++){
+	    			competencia.push_back(*c);
+	    		}
+	    		    		esIgualCompetencia=false;
+	    	}else if(!competencia.empty()){
+	    		esIgualCompetencia=false;
+	    		for(auto r = begin(competencia); r != end(competencia); r++){
+	    			for(auto c = begin(per->competencia); c != end(per->competencia); c++){
+	    		        if(*r == *c){
+	    		            esIgualCompetencia=true;
+	    		        }
+	    			}
+	    		}
+	    		if(esIgualCompetencia!=true){
+	    			for(auto c = begin(per->competencia); c != end(per->competencia); c++){
+	    			    competencia.push_back(*c);
+	    		    }
+	    		}
+	        }
+	    	if(nivelCompetenciaAlcanzado.empty()){
+	    		nivelCompetenciaAlcanzado.push_back(per->nivelCompetenciaAlcanzado);
+	    		esIgualNivelCompetenciaAlcanzado=false;
+	    	}else if(!nivelCompetenciaAlcanzado.empty()){
+	    		esIgualNivelCompetenciaAlcanzado=false;
+	    		for(auto r = begin(nivelCompetenciaAlcanzado); r != end(nivelCompetenciaAlcanzado); r++){
+	    			if(*r == per->nivelCompetenciaAlcanzado){
+	    			    esIgualNivelCompetenciaAlcanzado=true;
+	    			}
+	    		}
+	    		if(esIgualNivelCompetenciaAlcanzado!=true){
+	    			nivelCompetenciaAlcanzado.push_back(per->nivelCompetenciaAlcanzado);
+	    		}
 	    	}
 	    }
+	}
 	for(auto n=begin(evaluacion); n!=end(evaluacion); n++){
 		contarEvaluacion++;
 		cout << "evaluacion: " << *n << endl;
@@ -226,4 +252,7 @@ void esIgual(vector<string>& competencia, string competenciaStr){
 		}
 	}
 	if(esIgual==false){competencia.push_back(competenciaStr);}
+}
+void generarTablas(){
+
 }
