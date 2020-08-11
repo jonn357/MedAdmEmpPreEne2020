@@ -24,7 +24,8 @@ struct Persona{
 	 string resultadoCalificacion;
  };
 map<string, vector<Persona>> personas;
-vector<string> evaluacion,competencia,nivelCompetenciaAlcanzado,competenciaPrueba;
+vector<string> evaluacion,competencia,nivelCompetenciaAlcanzado;
+int contador;
 void leer();
 void escribirCSV();
 void imprimir(map<string, vector<Persona>>);
@@ -113,23 +114,30 @@ void escribirCSV(){
 	   string line = "";
 	   for(auto n = begin(personas); n != end(personas); n++){
 	       	for(auto per = begin(n->second); per != end(n->second); per++){
-	       		outfile << n->first << "," << per->nombre<< endl;
+	       		for(auto c = begin(per->competencia); c != end(per->competencia); c++){
+	       		    outfile << n->first << "," << per->nombre<< "," << *c << "," <<  per->evaluacion << "," << per->periodo <<  "," << per->orden <<  "," << per->nivelCompetenciaAlcanzado << endl;
+	       		}
 	       	}
 	       }
 	   outfile.close();
 }
 void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<string>& evaluacion, vector<string>& competencia, vector<string>& nivelCompetenciaAlcanzado){                  /*por periodo,por evaluacion, por competencia*/
-	int contador=0;
+	//int contador=0;
 	for(auto e = begin(evaluacion); e != end(evaluacion); e++){
         for(auto c = begin(competencia); c != end(competencia); c++){
-	        for(auto p = begin(personas); p != end(personas); p++){
-	    	    for(auto nCa = begin(nivelCompetenciaAlcanzado); nCa != end(nivelCompetenciaAlcanzado); nCa++){
+	    	for(auto nCa = begin(nivelCompetenciaAlcanzado); nCa != end(nivelCompetenciaAlcanzado); nCa++){
+	    	    for(auto p = begin(personas); p != end(personas); p++){
 	    	    	cout << "e;"<< *e << ";c;"<< *c << ";p;"<< p->first << ";nCa;"<< *nCa;
                     for(auto pers = begin(p->second); pers != end(p->second); pers++){
-                    	contador++;
+                    	for(auto cp = begin(pers->competencia); cp != end(pers->competencia); cp++){
+                    		if(*e==pers->evaluacion && *c==*cp && *nCa==pers->nivelCompetenciaAlcanzado && p->first==pers->periodo){
+                    	        contador++;
+                    	    }
+                    	}
                     }
                     cout << ";CONTADOR;" << contador << endl;
-	    	    }
+                    contador=0;
+	    	    }//
 	        }
         }
     }
