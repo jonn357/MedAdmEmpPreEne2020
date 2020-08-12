@@ -19,16 +19,23 @@ struct Persona{
 	 string nombre;
 	 string evaluacion;
 	 string curso;
-	 vector<string> competencia;//string competencia; // vector<string> competencia;debe ser un vector de competencias.z
+	 vector<string> competencia;//string competencia; // vector<string> competencia;debe ser un vector de competencias
 	 string nivelCompetenciaAlcanzado;
 	 string resultadoCalificacion;
  };
+struct Tabla{     //mapa<mapas> los mapas contiene tablas
+	//vector<int> valor;
+	map<string,vector<int>> filas;
+	map<string,vector<int>> columnas;
+    string evaluacion;
+    string competencia;
+};
+map<string, vector<Tabla>> tablas;
 map<string, vector<Persona>> personas;
 vector<string> evaluacion,competencia,nivelCompetenciaAlcanzado;
 int contador;
 void leer();
 void escribirCSV();
-void imprimir(map<string, vector<Persona>>);
 void cargarDatos(vector<string>);
 void cargarPersonas(Persona);
 void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<string>& evaluacion, vector<string>& competencia, vector<string>& nivelCompetenciaAlcanzado);
@@ -36,13 +43,13 @@ void extraerVariables(vector<string>& evaluacion, vector<string>& competencia, v
 void split(vector<string>& competencia, string competenciaStr);
 string arrayAstring(char* , int);
 void esIgual(vector<string>& competencia, string competenciaStr);
-void generarTablas();
+void guardarTabla(string e,string c,string p,string nCa,int contador);
+void cargarTabla(Tabla&);
 int main() {
 	leer();
-
-	escribirCSV();
 	extraerVariables(evaluacion, competencia, nivelCompetenciaAlcanzado);
 	contarNivelCompetencia(personas, evaluacion, competencia, nivelCompetenciaAlcanzado);
+	escribirCSV();
 	return 0;
 }
 void leer(){                              //lee el archivo csv, los datos los almacena en una matriz.
@@ -78,15 +85,6 @@ void leer(){                              //lee el archivo csv, los datos los al
 //contar por nivelCompetencia, cuantos insuficientes, cuantos intermedio y cuantos avanzados hay?.
 //segun el tipo de evaluacion: sumatoria o formativa para cada competencia: gestion de mercadeo, gestion de organizaciones,
 //gestion financiera y gestion de personas.
-void imprimir(map<string, vector<Persona>> personaMap){
-	cout << "imprimiendo" << endl;
-    for(auto n = begin(personaMap); n != end(personaMap); n++){
-    	cout << endl << "periodo: " << n->first << endl;
-    	for(auto per = begin(n->second); per != end(n->second); per++){
-    		cout << "nombre: " << per->nombre << endl;
-    	}
-    }
-}
 void cargarDatos( vector<string> entradaRegistro){
 	Persona persona;
 	persona.orden=entradaRegistro[0];
@@ -95,7 +93,6 @@ void cargarDatos( vector<string> entradaRegistro){
 	persona.evaluacion=entradaRegistro[3];
 	persona.curso=entradaRegistro[4];
 	split(persona.competencia,entradaRegistro[5]);
-	//persona.competencia=entradaRegistro[5];    //VECTOR + split
 	persona.nivelCompetenciaAlcanzado=entradaRegistro[6];
 	persona.resultadoCalificacion=entradaRegistro[7];
 	cargarPersonas(persona);
@@ -104,30 +101,39 @@ void cargarPersonas( Persona persona){
 	personas[persona.periodo].push_back(persona);
 }
 void escribirCSV(){
+	int cont=0;
 	   ofstream outfile("C://Desarrollo//AcrhivosPlanos//tablas.csv");
-	   if (outfile.good()) {
-	           cout << "el fichero out se ha abierto correctamente" << endl;
+	   if(outfile.good()) {
+	       cout << "el fichero out se ha abierto correctamente" << endl;
+	   }
+	   if(outfile.fail()) {
+	       cout << "ERROR abriendo el fichero" << endl;
+	   }
+	   //string line = "";
+	   for(auto mVt = begin(tablas); mVt != end(tablas); mVt++){
+	       for(auto tabla = begin(mVt->second); tabla != end(mVt->second); tabla++){
+	    	   outfile <<tabla->competencia << ";" << tabla->evaluacion << endl;
+	       	   for(auto fila = begin(tabla->filas); fila != end(tabla->filas); fila++){
+	       		   outfile << fila->first << ";" ;
+                   for(auto valor =begin(fila->second); valor != end(fila->second); valor++){
+                	   cont++;
+	       		       outfile  << *valor << ";";
+                   }
+                   outfile <<"cont: " << cont << endl;
+                   cont=0;
+	       	   }
 	       }
-	   if (outfile.fail()) {
-	           cout << "ERROR abriendo el fichero" << endl;
-	       }
-	   string line = "";
-	   for(auto n = begin(personas); n != end(personas); n++){
-	       	for(auto per = begin(n->second); per != end(n->second); per++){
-	       		for(auto c = begin(per->competencia); c != end(per->competencia); c++){
-	       		    outfile << n->first << "," << per->nombre<< "," << *c << "," <<  per->evaluacion << "," << per->periodo <<  "," << per->orden <<  "," << per->nivelCompetenciaAlcanzado << endl;
-	       		}
-	       	}
-	       }
+	   }
 	   outfile.close();
 }
 void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<string>& evaluacion, vector<string>& competencia, vector<string>& nivelCompetenciaAlcanzado){                  /*por periodo,por evaluacion, por competencia*/
 	//int contador=0;
+	vector<string> guardarDatos;
 	for(auto e = begin(evaluacion); e != end(evaluacion); e++){
         for(auto c = begin(competencia); c != end(competencia); c++){
 	    	for(auto nCa = begin(nivelCompetenciaAlcanzado); nCa != end(nivelCompetenciaAlcanzado); nCa++){
 	    	    for(auto p = begin(personas); p != end(personas); p++){
-	    	    	cout << "e;"<< *e << ";c;"<< *c << ";p;"<< p->first << ";nCa;"<< *nCa;
+	    	    	//cout << "e;"<< *e << ";c;"<< *c << ";p;"<< p->first << ";nCa;"<< *nCa;
                     for(auto pers = begin(p->second); pers != end(p->second); pers++){
                     	for(auto cp = begin(pers->competencia); cp != end(pers->competencia); cp++){
                     		if(*e==pers->evaluacion && *c==*cp && *nCa==pers->nivelCompetenciaAlcanzado && p->first==pers->periodo){
@@ -135,7 +141,8 @@ void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<strin
                     	    }
                     	}
                     }
-                    cout << ";CONTADOR;" << contador << endl;
+                    guardarTabla(*e,*c,p->first,*nCa,contador);
+                    //cout << ";CONTADOR;" << contador << endl;
                     contador=0;
 	    	    }//
 	        }
@@ -261,6 +268,42 @@ void esIgual(vector<string>& competencia, string competenciaStr){
 	}
 	if(esIgual==false){competencia.push_back(competenciaStr);}
 }
-void generarTablas(){
+void guardarTabla(string e,string c,string p,string nCa,int contador){
+	bool siExisteTabla=false;
+	if(tablas.empty()){
+		Tabla tabla;
+        tabla.evaluacion=e;
+        tabla.competencia=c;
+        tabla.filas[p].push_back(contador);
+        tabla.columnas[nCa].push_back(contador);
+        cargarTabla(tabla);
+	}else if(!tablas.empty()){
+		for(auto mVt = begin(tablas); mVt != end(tablas); mVt++){
+			if(mVt->first==e + ";" + c){
+			       for(auto tabla = begin(mVt->second); tabla != end(mVt->second); tabla++){
+			    	   //outfile <<tabla->competencia << ";" << tabla->evaluacion << endl;
+			       	   for(auto periodo = begin(tabla->filas); periodo != end(tabla->filas); periodo++){
+			       		   if(periodo->first==p){
+			       			   periodo->second.push_back(contador);
+			       		   }
+			       	   }
+			       }
+			}
+		}
+		/*for(auto ts = begin(tablas); ts != end(tablas); ts++){
+            if(ts->first==e + ";" + c){
+                for(auto tb=begin(ts->second); tb != end(ts->second); tb++){
+                	tb.
+                }
+            	//siExisteTabla=true;
+            }
+		}*/
+		if(siExisteTabla==true){
 
+		}
+        /*mire si existe la tabla (competencia;evaluacion)*/
+	}
+}
+void cargarTabla(Tabla& tabla){
+	tablas[tabla.competencia + ";" + tabla.evaluacion].push_back(tabla);
 }
