@@ -30,6 +30,7 @@ struct Tabla{     //mapa<mapas> los mapas contiene tablas
     string evaluacion;
     string competencia;
 };
+int contG=0, contGuardar=0,contNumTablas=0;
 map<string, vector<Tabla>> tablas;
 map<string, vector<Persona>> personas;
 vector<string> evaluacion,competencia,nivelCompetenciaAlcanzado;
@@ -60,6 +61,8 @@ void leer(){                              //lee el archivo csv, los datos los al
    ifstream infile("C://Desarrollo//AcrhivosPlanos//MedAdmEmpPreEne2020.csv");
    if (infile.good()) {
            cout << "el fichero input se ha abierto correctamente" << endl;
+           cout <<"* "<< endl;
+           	       cout <<"* "<< endl;
        }
    if (infile.fail()) {
            cout << "ERROR abriendo el fichero" << endl;
@@ -107,6 +110,8 @@ void escribirCSV(){
 	   ofstream outfile("C://Desarrollo//AcrhivosPlanos//tablas.csv");
 	   if(outfile.good()) {
 	       cout << "el fichero out se ha abierto correctamente" << endl;
+	       cout <<"* "<< endl;
+	       cout <<"* "<< endl;
 	   }
 	   if(outfile.fail()) {
 	       cout << "ERROR abriendo el fichero" << endl;
@@ -194,19 +199,19 @@ void extraerVariables(vector<string>& evaluacion, vector<string>& competencia, v
 	}
 	for(auto n=begin(evaluacion); n!=end(evaluacion); n++){
 		contarEvaluacion++;
-		cout << "evaluacion: " << *n << endl;
+		//cout << "evaluacion: " << *n << endl;
 	}
-	cout << "Total Evaluacion: " << contarEvaluacion << "total: "<< evaluacion.size() << endl;
+	//cout << "Total Evaluacion: " << contarEvaluacion << "total: "<< evaluacion.size() << endl;
 	for(auto n=begin(competencia); n != end(competencia); n++){
-		contarCompetencia++,
-		cout << "competencia: " << *n << endl;
+		contarCompetencia++;
+		//cout << "competencia: " << *n << endl;
 	}
-	cout << "Total Competencia: " << contarCompetencia << "total: "<< competencia.size() << endl;
+	//cout << "Total Competencia: " << contarCompetencia << "total: "<< competencia.size() << endl;
 	for(auto n = begin(nivelCompetenciaAlcanzado); n != end(nivelCompetenciaAlcanzado); n++){
-		cout << "nivelCompetenciaAlcanzado: " << *n << endl;
+		//cout << "nivelCompetenciaAlcanzado: " << *n << endl;
 		contarNivelCompetenciaAlcanzado++;
 	}
-	cout << "Total NivelCompetenciaAlcanzado: " << contarNivelCompetenciaAlcanzado << "total: "<< nivelCompetenciaAlcanzado.size() << endl;
+	//cout << "Total NivelCompetenciaAlcanzado: " << contarNivelCompetenciaAlcanzado << "total: "<< nivelCompetenciaAlcanzado.size() << endl;
 }
 string arrayAstring(char* arregloChar, int sizeChar){     //convierte array en string
 	int i;
@@ -254,14 +259,15 @@ void esIgual(vector<string>& competencia, string competenciaStr){
 	if(esIgual==false){competencia.push_back(competenciaStr);}
 }
 void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<string>& evaluacion, vector<string>& competencia, vector<string>& nivelCompetenciaAlcanzado){                  /*por periodo,por evaluacion, por competencia*/
-	//int contador=0;
-	cout << "contarNivelCompetencia()" << endl;
+	int contGuardarTabla=0;
+	contG++;
+cout << "********************************contarNivelCompetencia()*********************"  << endl;
 	vector<string> guardarDatos;
 	for(auto e = begin(evaluacion); e != end(evaluacion); e++){
         for(auto c = begin(competencia); c != end(competencia); c++){
 	    	for(auto nCa = begin(nivelCompetenciaAlcanzado); nCa != end(nivelCompetenciaAlcanzado); nCa++){
 	    	    for(auto p = begin(personas); p != end(personas); p++){
-	    	    	//cout << "e;"<< *e << ";c;"<< *c << ";p;"<< p->first << ";nCa;"<< *nCa;
+cout  << contG <<") contG cNc(){},"<< " c: "<< *c << " e;"<< *e << " p;"<< p->first << " nCa;"<< *nCa;
                     for(auto pers = begin(p->second); pers != end(p->second); pers++){
                     	for(auto cp = begin(pers->competencia); cp != end(pers->competencia); cp++){
                     		if(*e==pers->evaluacion && *c==*cp && *nCa==pers->nivelCompetenciaAlcanzado && p->first==pers->periodo){
@@ -269,44 +275,54 @@ void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<strin
                     	    }
                     	}
                     }
+                    cout << " CONTADOR: (" << contador << ") contGuardarTabla: (" << contGuardarTabla << ")" << endl;
+                    cout<< endl;
                     guardarTabla(*e,*c,p->first,*nCa,contador);
-                    //cout << ";CONTADOR;" << contador << endl;
+                    contGuardarTabla++;
+
                     contador=0;
 	    	    }//
 	        }
         }
     }
+	cout << "********************************out contarNivelCompetencia()*********************xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  << endl;
 }
 void guardarTabla(string e,string c,string p,string nCa,int contador){
 	int i=0;
-	//cout << "in guardarTabla()" << endl;
+	bool existeTabla=false;
+	cout << "**************************************************in guardarTabla()" << endl;
+	cout << contGuardar << " contGuardar "<< endl;
+	contGuardar++;
+
 	if(tablas.empty()){
 		crearTabla(e,c,p,nCa,contador);
+		cout << "mapa tablas vacio" << endl;
 		//cout << " c: " << c << ", e: " << e << ", p: " << p << ", nCa: " << nCa << ", contador: " << contador<< endl;
 	}else if(!tablas.empty()){
 		for(auto mVt = begin(tablas); mVt != end(tablas); mVt++){
-i++;
+        cout << "   " << i << ") mVt->first: "<< mVt->first << endl;
+        i++;
 			if(mVt->first==c + ";" + e){
 				//cout <<  "mVt->first" <<  mVt->first<< ", c: " << c << ", e: " << e << ", p: " << p << ", nCa: " << nCa << ", contador: " << contador<< endl;
 			    for(auto tabla = begin(mVt->second); tabla != end(mVt->second); tabla++){
+			    	cout << contNumTablas << " (" << tabla->competencia << ";"<< tabla->evaluacion<<")"<< endl;
+			    	contNumTablas++;
 			    	if(tabla->evaluacion == e && tabla->competencia == c){
-			       	    //for(auto periodo = begin(tabla->filas); periodo != end(tabla->filas); periodo++){
-			       		    //if(periodo->first==p){
-			       			    tabla->filas[p].push_back(contador);
-			       		        //for(auto fila = begin(periodo->second); fila != end(periodo->second); fila++){
-			       			             //fila.push_back(contador);
-			       		        //}
-			       		    //}
-			       	    //}
+			       		tabla->filas[p].push_back(contador);
+			       		existeTabla=true;//confirmacion. tabla encontrada ok
 			    	}
 			    }
-			}else{
-                crearTabla(e,c,p,nCa,contador);
-			}
+			    contNumTablas=0;
+			}//else{
+               // crearTabla(e,c,p,nCa,contador);
+			//}
+		}//fin for tablas map
+		if(existeTabla==false){
+			crearTabla(e,c,p,nCa,contador);
 		}
 	}
 
-	//cout << "out guardarTabla() i=" << i << endl;
+	cout << "***************************************************out guardarTabla()************************************ i=" << i << endl;
 	i=0;
 }
 void cargarTabla(Tabla& tabla){
