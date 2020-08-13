@@ -45,6 +45,7 @@ string arrayAstring(char* , int);
 void esIgual(vector<string>& competencia, string competenciaStr);
 void guardarTabla(string e,string c,string p,string nCa,int contador);
 void cargarTabla(Tabla&);
+void crearTabla(string e,string c,string p,string nCa,int contador);
 int main() {
 	leer();
 	extraerVariables(evaluacion, competencia, nivelCompetenciaAlcanzado);
@@ -101,7 +102,8 @@ void cargarPersonas( Persona persona){
 	personas[persona.periodo].push_back(persona);
 }
 void escribirCSV(){
-	int cont=0;
+	cout << "escribirCSV()" << endl;
+	int cont=0, contmVt=0,conttabla=0;
 	   ofstream outfile("C://Desarrollo//AcrhivosPlanos//tablas.csv");
 	   if(outfile.good()) {
 	       cout << "el fichero out se ha abierto correctamente" << endl;
@@ -109,10 +111,12 @@ void escribirCSV(){
 	   if(outfile.fail()) {
 	       cout << "ERROR abriendo el fichero" << endl;
 	   }
-	   //string line = "";
 	   for(auto mVt = begin(tablas); mVt != end(tablas); mVt++){
+		   contmVt++;
+		   outfile << "contmVt: " << contmVt <<endl;
 	       for(auto tabla = begin(mVt->second); tabla != end(mVt->second); tabla++){
-	    	   outfile <<tabla->competencia << ";" << tabla->evaluacion << endl;
+	    	   conttabla++;
+	    	   outfile << "conttabla:" << conttabla << ";"<<tabla->competencia << ";" << tabla->evaluacion << endl;
 	       	   for(auto fila = begin(tabla->filas); fila != end(tabla->filas); fila++){
 	       		   outfile << fila->first << ";" ;
                    for(auto valor =begin(fila->second); valor != end(fila->second); valor++){
@@ -123,31 +127,12 @@ void escribirCSV(){
                    cont=0;
 	       	   }
 	       }
+	       conttabla=0;
+	       cout << tablas.size() << endl;
 	   }
+	   cout << "contmVt: " << contmVt << endl;
+	   contmVt=0;
 	   outfile.close();
-}
-void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<string>& evaluacion, vector<string>& competencia, vector<string>& nivelCompetenciaAlcanzado){                  /*por periodo,por evaluacion, por competencia*/
-	//int contador=0;
-	vector<string> guardarDatos;
-	for(auto e = begin(evaluacion); e != end(evaluacion); e++){
-        for(auto c = begin(competencia); c != end(competencia); c++){
-	    	for(auto nCa = begin(nivelCompetenciaAlcanzado); nCa != end(nivelCompetenciaAlcanzado); nCa++){
-	    	    for(auto p = begin(personas); p != end(personas); p++){
-	    	    	//cout << "e;"<< *e << ";c;"<< *c << ";p;"<< p->first << ";nCa;"<< *nCa;
-                    for(auto pers = begin(p->second); pers != end(p->second); pers++){
-                    	for(auto cp = begin(pers->competencia); cp != end(pers->competencia); cp++){
-                    		if(*e==pers->evaluacion && *c==*cp && *nCa==pers->nivelCompetenciaAlcanzado && p->first==pers->periodo){
-                    	        contador++;
-                    	    }
-                    	}
-                    }
-                    guardarTabla(*e,*c,p->first,*nCa,contador);
-                    //cout << ";CONTADOR;" << contador << endl;
-                    contador=0;
-	    	    }//
-	        }
-        }
-    }
 }
 void extraerVariables(vector<string>& evaluacion, vector<string>& competencia, vector<string>&   nivelCompetenciaAlcanzado){
 	bool esIgualEvaluacion=false;
@@ -268,42 +253,72 @@ void esIgual(vector<string>& competencia, string competenciaStr){
 	}
 	if(esIgual==false){competencia.push_back(competenciaStr);}
 }
+void contarNivelCompetencia(map<string, vector<Persona>>& personas, vector<string>& evaluacion, vector<string>& competencia, vector<string>& nivelCompetenciaAlcanzado){                  /*por periodo,por evaluacion, por competencia*/
+	//int contador=0;
+	cout << "contarNivelCompetencia()" << endl;
+	vector<string> guardarDatos;
+	for(auto e = begin(evaluacion); e != end(evaluacion); e++){
+        for(auto c = begin(competencia); c != end(competencia); c++){
+	    	for(auto nCa = begin(nivelCompetenciaAlcanzado); nCa != end(nivelCompetenciaAlcanzado); nCa++){
+	    	    for(auto p = begin(personas); p != end(personas); p++){
+	    	    	//cout << "e;"<< *e << ";c;"<< *c << ";p;"<< p->first << ";nCa;"<< *nCa;
+                    for(auto pers = begin(p->second); pers != end(p->second); pers++){
+                    	for(auto cp = begin(pers->competencia); cp != end(pers->competencia); cp++){
+                    		if(*e==pers->evaluacion && *c==*cp && *nCa==pers->nivelCompetenciaAlcanzado && p->first==pers->periodo){
+                    	        contador++;
+                    	    }
+                    	}
+                    }
+                    guardarTabla(*e,*c,p->first,*nCa,contador);
+                    //cout << ";CONTADOR;" << contador << endl;
+                    contador=0;
+	    	    }//
+	        }
+        }
+    }
+}
 void guardarTabla(string e,string c,string p,string nCa,int contador){
-	bool siExisteTabla=false;
+	int i=0;
+	//cout << "in guardarTabla()" << endl;
 	if(tablas.empty()){
-		Tabla tabla;
-        tabla.evaluacion=e;
-        tabla.competencia=c;
-        tabla.filas[p].push_back(contador);
-        tabla.columnas[nCa].push_back(contador);
-        cargarTabla(tabla);
+		crearTabla(e,c,p,nCa,contador);
+		//cout << " c: " << c << ", e: " << e << ", p: " << p << ", nCa: " << nCa << ", contador: " << contador<< endl;
 	}else if(!tablas.empty()){
 		for(auto mVt = begin(tablas); mVt != end(tablas); mVt++){
-			if(mVt->first==e + ";" + c){
-			       for(auto tabla = begin(mVt->second); tabla != end(mVt->second); tabla++){
-			    	   //outfile <<tabla->competencia << ";" << tabla->evaluacion << endl;
-			       	   for(auto periodo = begin(tabla->filas); periodo != end(tabla->filas); periodo++){
-			       		   if(periodo->first==p){
-			       			   periodo->second.push_back(contador);
-			       		   }
-			       	   }
-			       }
+i++;
+			if(mVt->first==c + ";" + e){
+				//cout <<  "mVt->first" <<  mVt->first<< ", c: " << c << ", e: " << e << ", p: " << p << ", nCa: " << nCa << ", contador: " << contador<< endl;
+			    for(auto tabla = begin(mVt->second); tabla != end(mVt->second); tabla++){
+			    	if(tabla->evaluacion == e && tabla->competencia == c){
+			       	    //for(auto periodo = begin(tabla->filas); periodo != end(tabla->filas); periodo++){
+			       		    //if(periodo->first==p){
+			       			    tabla->filas[p].push_back(contador);
+			       		        //for(auto fila = begin(periodo->second); fila != end(periodo->second); fila++){
+			       			             //fila.push_back(contador);
+			       		        //}
+			       		    //}
+			       	    //}
+			    	}
+			    }
+			}else{
+                crearTabla(e,c,p,nCa,contador);
 			}
 		}
-		/*for(auto ts = begin(tablas); ts != end(tablas); ts++){
-            if(ts->first==e + ";" + c){
-                for(auto tb=begin(ts->second); tb != end(ts->second); tb++){
-                	tb.
-                }
-            	//siExisteTabla=true;
-            }
-		}*/
-		if(siExisteTabla==true){
-
-		}
-        /*mire si existe la tabla (competencia;evaluacion)*/
 	}
+
+	//cout << "out guardarTabla() i=" << i << endl;
+	i=0;
 }
 void cargarTabla(Tabla& tabla){
 	tablas[tabla.competencia + ";" + tabla.evaluacion].push_back(tabla);
+	//cout << "cargarTabla() tamaño tablas:" << tablas.size() << endl;
+}
+void crearTabla(string e,string c,string p,string nCa,int contador){
+	//cout << "crearTabla(-)" << endl;
+	Tabla tabla;
+	tabla.evaluacion=e;
+	tabla.competencia=c;
+	tabla.filas[p].push_back(contador);
+	tabla.columnas[nCa].push_back(contador);
+	cargarTabla(tabla);
 }
